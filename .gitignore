@@ -1,0 +1,15 @@
+node_modules/
+dist/
+dist-electron/
+release/
+.env
+.env.*
+*.log
+.DS_Store
+
+# Defensive: a workspace should never be scaffolded inside this repo, but
+# if one ever is, none of its content is publishable.
+/entries/
+/projects/*/
+/reviews/*/output/*.md
+!/reviews/*/output/.gitkeep
