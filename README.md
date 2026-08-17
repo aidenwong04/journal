@@ -4,7 +4,7 @@ A local, single-user journaling desktop app.
 Entries accumulate as markdown files on your own disk.
 Nothing here is a database, nothing here edits the past, and nothing here talks to a server.
 
-Built on [ICM](https://github.com) conventions: folders carry sequencing, hierarchy carries context, files carry state.
+Built on ICM (Interpretable Context Methodology) conventions: folders carry sequencing, hierarchy carries context, files carry state.
 The method (schema, contracts, templates) lives in `_system/`, inside the workspace this app creates for you.
 If something needs explaining, the explanation is in that folder's `CONTEXT.md`.
 
