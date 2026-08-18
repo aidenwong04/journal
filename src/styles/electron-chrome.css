@@ -1,0 +1,27 @@
+/* Electron window-chrome integration. Not part of the lifted Hallmark
+   design system in app.css; this exists only because a real OS window
+   needs a draggable region and clearance for macOS's inset traffic
+   lights, neither of which the browser-preview prototype had to handle. */
+
+.top {
+  -webkit-app-region: drag;
+  /* Fixed, not content-driven: main.ts's trafficLightPosition.y is
+     computed against this exact number, so it can't drift again just
+     because the bar's content changes later. */
+  min-height: 52px;
+  box-sizing: border-box;
+}
+
+/* Anything clickable inside the drag region has to opt back out, or it
+   never receives the click. */
+.top button,
+.top .searchpill,
+.top input {
+  -webkit-app-region: no-drag;
+}
+
+/* macOS's hiddenInset title bar leaves the traffic lights floating over
+   the top-left of the window content; give them room. */
+[data-platform="mac"] .top {
+  padding-left: 78px;
+}

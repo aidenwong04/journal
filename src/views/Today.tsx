@@ -8,6 +8,8 @@ interface Props {
   today: string;
   /** Called when the current journal day rolls over while this view is open. */
   onSealed: (date: string) => void;
+  /** Called after a successful save, so the rail's cadence/week rows refetch. */
+  onSaved: () => void;
 }
 
 /**
@@ -15,7 +17,7 @@ interface Props {
  * boundary that file seals." This view polls isSealed rather than trusting
  * a value computed at mount, so the rollover needs no restart.
  */
-export default function Today({ today, onSealed }: Props) {
+export default function Today({ today, onSealed, onSaved }: Props) {
   const [entry, setEntry] = useState<Entry | null>(null);
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [blockerSuggestions, setBlockerSuggestions] = useState<string[]>([]);
@@ -45,6 +47,7 @@ export default function Today({ today, onSealed }: Props) {
       const result = await window.journal.saveTodayEntry(entry);
       setViolations(result.violations);
       setSavedAt(new Date());
+      if (result.violations.length === 0) onSaved();
     } finally {
       setSaving(false);
     }

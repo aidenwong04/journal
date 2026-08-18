@@ -4,7 +4,6 @@
   "version": "0.1.0",
   "description": "A local, single-user journaling desktop app. Entries accumulate as markdown files; nothing here is a database, and nothing here edits the past.",
   "private": true,
-  "type": "module",
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite",

@@ -6,13 +6,23 @@
 
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import { extractProposedChange } from "./proposal-parse.js";
+import { extractProposedChange } from "./proposal-parse";
+import { journalDate } from "./journal-date";
 
 export interface ProjectSummary {
   slug: string;
   status: string;
   cadenceDaysPerWeek: number | null;
 }
+
+export interface NewProjectInput {
+  slug: string;
+  whatFor: string;
+  cadenceDaysPerWeek: number;
+  cadenceNote: string;
+}
+
+const KEBAB_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 export interface Proposal {
   /** Filename, e.g. 2026-08-09-cadence-or-scope.md */
@@ -147,4 +157,61 @@ export async function acceptProposal(
 
 export async function rejectProposal(workspace: string, slug: string, file: string): Promise<void> {
   await fs.unlink(path.join(projectsRoot(workspace), slug, "_inbox", file));
+}
+
+/**
+ * Create a new projects/<slug>/ node. Follows the exact section order in
+ * template/_system/templates/project.md. The two sections the creation
+ * form doesn't collect (what done looks like, open questions) get honest
+ * placeholder prose rather than being invented, consistent with
+ * projects/CONTEXT.md's "small knowledge node... edited by hand" stance:
+ * this only has to produce a schema-valid starting point.
+ */
+export async function createProject(workspace: string, input: NewProjectInput): Promise<void> {
+  const slug = input.slug.trim();
+  if (!KEBAB_RE.test(slug)) {
+    throw new Error("slug must be kebab-case: lowercase letters, digits, and hyphens only");
+  }
+  const dir = path.join(projectsRoot(workspace), slug);
+  if (await pathExists(path.join(dir, "project.md"))) {
+    throw new Error(`projects/${slug}/project.md already exists`);
+  }
+  if (!Number.isInteger(input.cadenceDaysPerWeek) || input.cadenceDaysPerWeek < 0 || input.cadenceDaysPerWeek > 7) {
+    throw new Error("cadence_days_per_week must be a whole number 0-7");
+  }
+
+  await fs.mkdir(path.join(dir, "_inbox"), { recursive: true });
+
+  const today = journalDate();
+  const whatFor = input.whatFor.trim() || "Not yet written. Edit this by hand.";
+  const cadenceNote = input.cadenceNote.trim() || "not yet decided";
+
+  const content = `---
+slug: ${slug}
+status: active
+started: ${today}
+cadence_days_per_week: ${input.cadenceDaysPerWeek}
+cadence_note: ${cadenceNote}
+---
+
+# ${slug}
+
+## What this is for
+${whatFor}
+
+## What done looks like
+Not yet written. Something a person other than you could confirm has happened; edit this by hand once you know what that is.
+
+## Committed cadence
+${input.cadenceDaysPerWeek} days a week. Say what you're giving up to protect it, once you know.
+
+## Open questions
+-
+
+## Current state
+Last updated by hand on ${today}.
+The review never edits this file. Proposals arrive in \`_inbox/\`.
+`;
+
+  await fs.writeFile(path.join(dir, "project.md"), content, "utf8");
 }

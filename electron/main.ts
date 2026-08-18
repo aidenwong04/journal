@@ -1,7 +1,6 @@
 import { app, BrowserWindow, ipcMain, dialog, shell } from "electron";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
-import { journalDate, isSealed } from "./journal-date.js";
+import { journalDate, isSealed } from "./journal-date";
 import {
   defaultWorkspacePath,
   ensureWorkspace,
@@ -9,7 +8,7 @@ import {
   looksLikeWorkspace,
   resolveWorkspace,
   setConfiguredWorkspace,
-} from "./workspace.js";
+} from "./workspace";
 import {
   listEntryDates,
   newBlankEntry,
@@ -19,13 +18,16 @@ import {
   saveCorrection,
   saveTodayEntry,
   validateEntryOnDisk,
-} from "./entries.js";
-import type { Entry } from "./frontmatter.js";
-import { acceptProposal, listAllInbox, listProjects, readProjectFile, rejectProposal } from "./projects.js";
-import { listAllReviews, listReviews, readReview } from "./reviews.js";
-import type { ReviewTier } from "./reviews.js";
+} from "./entries";
+import type { Entry } from "./frontmatter";
+import { acceptProposal, createProject, listAllInbox, listProjects, readProjectFile, rejectProposal } from "./projects";
+import type { NewProjectInput } from "./projects";
+import { listAllReviews, listReviews, readReview } from "./reviews";
+import type { ReviewTier } from "./reviews";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// __dirname is a native CommonJS global here; see electron/tsconfig.json's
+// "module": "CommonJS" (Electron preload scripts need CJS under
+// sandbox: true, so the whole main process is compiled the same way).
 
 let workspacePath: string | null = null;
 
@@ -41,7 +43,12 @@ async function createWindow() {
     minWidth: 720,
     minHeight: 560,
     backgroundColor: "#121216", // approximates --color-paper (oklch(14% 0.012 265)) to avoid a flash on launch
+    icon: path.join(__dirname, "..", "build", "icon.png"),
     titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "default",
+    // .top is pinned to min-height: 52px (electron-chrome.css) specifically
+    // so this number stays correct regardless of what content the bar
+    // holds. y centers the ~16px light cluster in that 52px bar: 26 - 8 = 18.
+    trafficLightPosition: process.platform === "darwin" ? { x: 20, y: 18 } : undefined,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
@@ -139,6 +146,10 @@ function registerHandlers() {
     return readProjectFile(requireWorkspace(), slug);
   });
 
+  ipcMain.handle("journal:createProject", async (_e, input: NewProjectInput) => {
+    return createProject(requireWorkspace(), input);
+  });
+
   ipcMain.handle("journal:listInbox", async () => {
     return listAllInbox(requireWorkspace());
   });
@@ -175,6 +186,12 @@ function registerHandlers() {
 }
 
 app.whenReady().then(async () => {
+  // Packaged builds get the dock icon from the app bundle's Info.plist
+  // (build/icon.icns via electron-builder); dev mode runs as a bare
+  // Electron.app, so the icon needs setting explicitly here.
+  if (process.platform === "darwin" && process.env.NODE_ENV === "development") {
+    app.dock?.setIcon(path.join(__dirname, "..", "build", "icon.png"));
+  }
   registerHandlers();
   await createWindow();
 

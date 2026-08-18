@@ -35,5 +35,5 @@ export default function App() {
     return <FirstRun onReady={refresh} />;
   }
 
-  return <Shell status={status} onWorkspaceChanged={refresh} />;
+  return <Shell status={status} />;
 }

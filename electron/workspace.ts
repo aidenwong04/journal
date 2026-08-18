@@ -9,9 +9,9 @@
 import { app } from "electron";
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// __dirname is a native CommonJS global here; see electron/tsconfig.json's
+// "module": "CommonJS".
 
 function configPath(): string {
   return path.join(app.getPath("userData"), "workspace.json");

@@ -7,7 +7,7 @@
 // in lockstep, and see tests/domain/validate.test.ts for the test that
 // runs the real bash script over the same fixtures as a cross-check.
 
-import type { Entry } from "./frontmatter.js";
+import type { Entry } from "./frontmatter";
 
 export interface Violation {
   field: string;

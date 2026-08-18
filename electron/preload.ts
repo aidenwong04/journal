@@ -3,7 +3,7 @@
 // api-types.ts, is the complete audit surface for "what can the UI touch."
 
 import { contextBridge, ipcRenderer } from "electron";
-import type { JournalApi } from "./api-types.js";
+import type { JournalApi } from "./api-types";
 
 function call<K extends keyof JournalApi>(channel: K) {
   return (...args: unknown[]) => ipcRenderer.invoke(`journal:${channel}`, ...args);
@@ -26,6 +26,7 @@ const api: JournalApi = {
 
   listProjects: call("listProjects"),
   readProjectFile: call("readProjectFile"),
+  createProject: call("createProject"),
   listInbox: call("listInbox"),
   acceptProposal: call("acceptProposal"),
   rejectProposal: call("rejectProposal"),

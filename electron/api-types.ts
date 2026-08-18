@@ -2,10 +2,10 @@
 // be audited in a single file. The renderer never gets raw fs access; this
 // is the entire capability set it has.
 
-import type { Entry } from "./frontmatter.js";
-import type { Violation } from "./validate.js";
-import type { ProjectSummary, Proposal } from "./projects.js";
-import type { ReviewSummary, Review, ReviewTier } from "./reviews.js";
+import type { Entry } from "./frontmatter";
+import type { Violation } from "./validate";
+import type { ProjectSummary, Proposal, NewProjectInput } from "./projects";
+import type { ReviewSummary, Review, ReviewTier } from "./reviews";
 
 export interface JournalStatus {
   workspacePath: string | null;
@@ -30,6 +30,7 @@ export interface JournalApi {
 
   listProjects(): Promise<ProjectSummary[]>;
   readProjectFile(slug: string): Promise<string | null>;
+  createProject(input: NewProjectInput): Promise<void>;
   listInbox(): Promise<Proposal[]>;
   acceptProposal(slug: string, file: string, replacement: { old: string; next: string }): Promise<void>;
   rejectProposal(slug: string, file: string): Promise<void>;

@@ -4,9 +4,9 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
-import { entryPathParts, isSealed, journalDate, type IsoDate } from "./journal-date.js";
-import { blankFrontmatter, parseEntry, serializeEntry, type Entry } from "./frontmatter.js";
-import { validateEntry, type Violation, type ValidateContext } from "./validate.js";
+import { entryPathParts, isSealed, journalDate, type IsoDate } from "./journal-date";
+import { blankFrontmatter, parseEntry, serializeEntry, type Entry } from "./frontmatter";
+import { validateEntry, type Violation, type ValidateContext } from "./validate";
 
 function entriesRoot(workspace: string): string {
   return path.join(workspace, "entries");
